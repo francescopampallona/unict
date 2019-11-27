@@ -4,6 +4,7 @@ const router = express.Router();
 const { check } = require('express-validator');
 
 const Tweet = require('../models/tweet');
+const Comment = require('../models/comment');
 const autenticationMiddleware = require('../middlewares/auth');
 const { checkValidation } = require('../middlewares/validation');
 
@@ -94,5 +95,37 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
     });
   });
 });
+// ----  COMMENTI ----
+router.put("/:id/new_comment", autenticationMiddleware.isAuth, [
+  check('comment').isString().isLength({min: 1, max: 120})
+], checkValidation, function(req, res, next) {
+  Tweet.findOne({_id: req.params.id}).exec(function(err, tweet) {
+    if (err) {
+      return res.status(500).json({
+        error: err,
+        message: "Error reading the tweet"
+      });
+    }
+    if (!tweet) {
+      return res.status(404).json({
+        message: "Tweet not found"
+      });
+    }
+    const newComment = new Comment(req.body);
+    newComment._author = res.locals.authInfo.userId;
+    tweet.comments.push(newComment);
+    
+    tweet.save(function(err) {
+      if(err) return res.status(500).json({error: err});
+      res.status(201).json(tweet);
+    });
+  });
+});
+// ---- LIKE  AL  TWEET---
+
+
+
+
+
 
 module.exports = router;
