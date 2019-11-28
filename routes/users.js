@@ -88,4 +88,57 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
     });
 });
 
+/* --- GESTIONE FAVORITI ---*/
+//ADD
+router.put('/:id/new_favourite', autenticationMiddleware.isAuth, function(request, response, next) {
+  if (response.locals.authInfo.userId !== request.params.id) {
+    return response.status(401).json({
+      error: "Unauthorized",
+      message: "You are not the owner of the resource"
+    });
+  }
+  User.findOne({_id: request.params.id})
+  .exec(function(err, user) {
+    if(err) return response.status(500).json({error:err});
+    if(!user) return response.status(404).json({message: 'User not found'});
+    const index = user._favourites.indexOf(request.body.favourite);
+    if(index===-1){
+      user._favourites.push(request.body.favourite);
+      user.save(function(err) {
+      if(err) return response.status(500).json({error: err});
+      response.json(user);
+    });
+   }
+   else{
+     return response.status(409).json('The resource already exists');
+   }
+  });
+});
+//REMOVE
+router.delete('/:id/remove_favourite', autenticationMiddleware.isAuth, function(req, res, next) {
+  if (res.locals.authInfo.userId !== req.params.id) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "You are not the owner of the resource"
+    });
+  }
+  User.findOne({_id: req.params.id})
+    .exec(function(err, user) {
+      if(err) return res.status(500).json({error: err});
+      if(!user) return res.status(404).json({message: 'User non found'});
+      const index = user._favourites.indexOf(req.body.favourite);
+      if(index!==-1){
+        user._favourites.splice(index, 1);
+        user.save(function(err) {
+          if(err) return res.status(500).json({error: err});
+          res.json(user);
+        });
+      }
+      else{
+        return res.status(404).json(`Favourite not found`);
+      }
+    });
+  });
+
+
 module.exports = router;
