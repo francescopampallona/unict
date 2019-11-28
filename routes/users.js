@@ -139,6 +139,21 @@ router.delete('/:id/remove_favourite', autenticationMiddleware.isAuth, function(
       }
     });
   });
+//GET
+  router.get('/:id/favourites', autenticationMiddleware.isAuth, function(req, res, next) {
+    if (res.locals.authInfo.userId !== req.params.id) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "You are not the owner of the resource"
+      });
+    }
+    User.findOne({_id: req.params.id}).populate("_favourites").exec(function(err, favourites){
+      if (err) return res.status(500).json({error: err});
+    res.json(favourites);
+
+    });
+
+  });
 
 
 module.exports = router;
