@@ -4,13 +4,12 @@ const router = express.Router();
 const { check } = require('express-validator');
 
 const Tweet = require('../models/tweet');
-const Comment = require('../models/comment');
 const autenticationMiddleware = require('../middlewares/auth');
 const { checkValidation } = require('../middlewares/validation');
 
 
 router.get('/', function(req, res, next) {
-  Tweet.find().populate("_author", "-password").exec(function(err, tweets){
+  Tweet.find({_parentTweet: null}).populate("_author", "-password").exec(function(err, tweets){
     if (err) return res.status(500).json({error: err});
     res.json(tweets);
   });
@@ -24,6 +23,13 @@ router.get('/:id', function(req, res, next) {
       if(!tweet) return res.status(404).json({message: 'Tweet not found'})
       res.json(tweet);
     });
+});
+
+router.get('/:id/comments', function(req, res, next){
+  Tweet.find({_parentTweet: req.params.id}).populate("_author", "-password").exec(function(err, tweets){
+    if (err) return res.status(500).json({error: err});
+    res.json(tweets);
+  });
 });
 
 router.post('/',autenticationMiddleware.isAuth, [
@@ -87,41 +93,30 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
         message: "You are not the owner of the resource"
       });
     }
-    Tweet.remove({_id: req.params.id}, function(err) {
-      if(err) {
-        return res.status(500).json({error: err})
-      }
-      res.json({message: 'Tweet successfully deleted'})
-    });
-  });
-});
-// ----  COMMENTI ----
-router.put("/:id/new_comment", autenticationMiddleware.isAuth, [
-  check('comment').isString().isLength({min: 1, max: 120})
-], checkValidation, function(req, res, next) {
-  Tweet.findOne({_id: req.params.id}).exec(function(err, tweet) {
-    if (err) {
-      return res.status(500).json({
-        error: err,
-        message: "Error reading the tweet"
-      });
-    }
-    if (!tweet) {
-      return res.status(404).json({
-        message: "Tweet not found"
-      });
-    }
-    const newComment = new Comment(req.body);
-    newComment._author = res.locals.authInfo.userId;
-    tweet.comments.push(newComment);
     
-    tweet.save(function(err) {
-      if(err) return res.status(500).json({error: err});
-      res.status(201).json(tweet);
-    });
+    if(tweet._parentTweet===null){
+      //Rimozione di tutti i commenti al tweet
+      Tweet.remove({_parentTweet: req.params.id}, function(err){
+        if(err) {
+          return res.status(500).json({error: err})
+        }
+        //Rimozione del tweet principale
+        Tweet.remove({_id: req.params.id}, function(err) {
+          if(err) {
+            return res.status(500).json({error: err})
+          }
+          res.json({message: 'Tweet successfully deleted'})
+        });
+        
+      });
+    }
+
+    
   });
 });
-// ---- LIKE  AL  TWEET---
+
+module.exports = router;
+// ---- LIKE  AL  TWEET ----
 
 
 
