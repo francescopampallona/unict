@@ -9,14 +9,14 @@ const autenticationMiddleware = require('../middlewares/auth');
 const { checkValidation } = require('../middlewares/validation');
 
 router.get('/', function(req, res, next) {
-  User.find({}, "-password", function(err, users){
+  User.find({}, ["-password", "-_favourites"], function(err, users){
     if (err) return res.status(500).json({error: err});
     res.json(users);
   });
 });
 
 router.get('/:id', function(req, res, next) {
-  User.findOne({_id: req.params.id}, "-password", function(err, user){
+  User.findOne({_id: req.params.id}, ["-password", "-_favourites"], function(err, user){
     if (err) return res.status(500).json({error: err});
     if(!user) return res.status(404).json({message: 'User not found'})
     res.json(user);
