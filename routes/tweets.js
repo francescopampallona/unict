@@ -114,9 +114,76 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
     
   });
 });
+/* --- GESTIONE DEI LIKES ---*/
+//ADD
+router.put('/:id/new_like', autenticationMiddleware.isAuth, function(req, res, next) {
+  Tweet.findOne({_id: req.params.id}).exec(function(err, tweet) {
+    if (err) {
+      return res.status(500).json({
+        error: err,
+        message: "Error reading the tweet"
+      });
+    }
+    if (!tweet) {
+      return res.status(404).json({
+        message: "Tweet not found"
+      });
+    }
+    if (res.locals.authInfo.userId!==req.body.user_id) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "You can't put like in someone else's name!!!!"
+      });
+    }
+    const index = tweet._likes.indexOf(req.body.user_id);
+    if(index===-1){
+      tweet._likes.push(req.body.user_id);
+      tweet.save(function(err) {
+        if(err) return res.status(500).json({error: err});
+        res.json(tweet);
+      });
+    }
+    else{
+      return response.status(409).json('This like already exists');
+    }
 
-module.exports = router;
-// ---- LIKE  AL  TWEET ----
+  });
+});
+//REMOVE
+router.delete('/:id/remove_like', autenticationMiddleware.isAuth, function(req, res, next) {
+  Tweet.findOne({_id: req.params.id}).exec(function(err, tweet) {
+    if (err) {
+      return res.status(500).json({
+        error: err,
+        message: "Error reading the tweet"
+      });
+    }
+    if (!tweet) {
+      return res.status(404).json({
+        message: "Tweet not found"
+      });
+    }
+    if (res.locals.authInfo.userId!==req.body.user_id) {
+      return res.status(401).json({
+        error: "Unauthorized",
+        message: "You can't remove like in someone else's name!!!!"
+      });
+    }
+    const index = tweet._likes.indexOf(req.body.user_id);
+    if(index!==-1){
+      tweet._likes.splice(index, 1);
+      tweet.save(function(err) {
+        if(err) return res.status(500).json({error: err});
+        res.json(tweet);
+      });
+    }
+    else{
+      return res.status(404).json(`Like not found`);
+    }
+
+
+  });
+});
 
 
 
