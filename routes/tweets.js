@@ -116,7 +116,7 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
 });
 /* --- GESTIONE DEI LIKES ---*/
 //ADD
-router.put('/:id/new_like', autenticationMiddleware.isAuth, function(req, res, next) {
+router.post('/:id/new_like', autenticationMiddleware.isAuth, function(req, res, next) {
   Tweet.findOne({_id: req.params.id}).exec(function(err, tweet) {
     if (err) {
       return res.status(500).json({
@@ -129,28 +129,22 @@ router.put('/:id/new_like', autenticationMiddleware.isAuth, function(req, res, n
         message: "Tweet not found"
       });
     }
-    if (res.locals.authInfo.userId!==req.body.user_id) {
-      return res.status(401).json({
-        error: "Unauthorized",
-        message: "You can't put like in someone else's name!!!!"
-      });
-    }
-    const index = tweet._likes.indexOf(req.body.user_id);
+    const index = tweet._likes.indexOf(res.locals.authInfo.userId);
     if(index===-1){
-      tweet._likes.push(req.body.user_id);
+      tweet._likes.push(res.locals.authInfo.userId);
       tweet.save(function(err) {
         if(err) return res.status(500).json({error: err});
         res.json(tweet);
       });
     }
     else{
-      return response.status(409).json('This like already exists');
+      return res.status(409).json('This like already exists');
     }
 
   });
 });
 //REMOVE
-router.delete('/:id/remove_like', autenticationMiddleware.isAuth, function(req, res, next) {
+router.post('/:id/remove_like', autenticationMiddleware.isAuth, function(req, res, next) {
   Tweet.findOne({_id: req.params.id}).exec(function(err, tweet) {
     if (err) {
       return res.status(500).json({
@@ -163,13 +157,7 @@ router.delete('/:id/remove_like', autenticationMiddleware.isAuth, function(req, 
         message: "Tweet not found"
       });
     }
-    if (res.locals.authInfo.userId!==req.body.user_id) {
-      return res.status(401).json({
-        error: "Unauthorized",
-        message: "You can't remove like in someone else's name!!!!"
-      });
-    }
-    const index = tweet._likes.indexOf(req.body.user_id);
+    const index = tweet._likes.indexOf(res.locals.authInfo.userId);
     if(index!==-1){
       tweet._likes.splice(index, 1);
       tweet.save(function(err) {
@@ -184,6 +172,9 @@ router.delete('/:id/remove_like', autenticationMiddleware.isAuth, function(req, 
 
   });
 });
+
+ 
+
 
 
 
