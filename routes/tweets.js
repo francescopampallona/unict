@@ -37,6 +37,7 @@ router.post('/',autenticationMiddleware.isAuth, [
 ], checkValidation, function(req, res, next) {
   const newTweet = new Tweet(req.body);
   newTweet._author = res.locals.authInfo.userId;
+  newTweet.hashtag = myFunction(newTweet.tweet);
   newTweet.save(function(err){
     if(err) {
       return res.status(500).json({error: err});
@@ -172,6 +173,29 @@ router.post('/:id/remove_like', autenticationMiddleware.isAuth, function(req, re
 
   });
 });
+/**
+ * RICERCA HASHTAG
+ */
+router.get('/:hashtag/search', function(req, res, next){
+  Tweet.find({hashtag: '#' + req.params.hashtag}).populate("_author", "-password").exec(function(err, tweets){
+    if (err) return res.status(500).json({error: err});
+    res.json(tweets);
+  });
+});
+/**
+ * myFunction
+ */
+function myFunction(str){
+  var res = str.split(" ");
+  var str1=[];
+  var j=0;
+  for(var i=0; i<res.length ;i++){
+      if(res[i][0]=="#")
+          str1[j++]= res[i];
+          
+  }
+  return str1;
+}
 
  
 
