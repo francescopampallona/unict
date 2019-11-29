@@ -90,7 +90,7 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
 
 /* --- GESTIONE FAVORITI ---*/
 //ADD
-router.put('/:id/new_favourite', autenticationMiddleware.isAuth, function(request, response, next) {
+router.post('/:id/new_favourite', autenticationMiddleware.isAuth, function(request, response, next) {
   if (response.locals.authInfo.userId !== request.params.id) {
     return response.status(401).json({
       error: "Unauthorized",
@@ -115,7 +115,7 @@ router.put('/:id/new_favourite', autenticationMiddleware.isAuth, function(reques
   });
 });
 //REMOVE
-router.delete('/:id/remove_favourite', autenticationMiddleware.isAuth, function(req, res, next) {
+router.post('/:id/remove_favourite', autenticationMiddleware.isAuth, function(req, res, next) {
   if (res.locals.authInfo.userId !== req.params.id) {
     return res.status(401).json({
       error: "Unauthorized",
