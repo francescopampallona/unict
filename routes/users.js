@@ -59,10 +59,10 @@ router.put('/:id', autenticationMiddleware.isAuth, function(request, response, n
   User.findOne({_id: request.params.id})
   .exec(function(err, user) {
     if(err) return response.status(500).json({error:err});
-    if(!user) return response.status(404).json({message: 'User not found'})
-    for(key in request.body) {
-      user[key] = request.body[key];
-    }
+    if(!user) return response.status(404).json({message: 'User not found'});
+    user.name = request.body.name;
+    user.surname = request.body.surname;
+    user.email = request.body.email;
     user.save(function(err) {
       if(err) return response.status(500).json({error: err});
       response.json(user);
@@ -87,7 +87,6 @@ router.delete('/:id', autenticationMiddleware.isAuth, function(req, res, next) {
       });
     });
 });
-
 /* --- GESTIONE FAVORITI ---*/
 //ADD
 router.post('/:id/new_favourite', autenticationMiddleware.isAuth, function(request, response, next) {
@@ -139,7 +138,8 @@ router.post('/:id/remove_favourite', autenticationMiddleware.isAuth, function(re
       }
     });
   });
- 
+
+  
 
 
 module.exports = router;
