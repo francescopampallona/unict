@@ -1,0 +1,22 @@
+{
+  "name": "unict-innovative",
+  "description": "",
+  "website": "https://github.com/francescopampallona/unict",
+  "repository": "https://github.com/francescopampallona/unict",
+  "logo": "https://node-js-sample.herokuapp.com/node.svg",
+  "success_url": "/",
+  "keywords": [
+    "node",
+    "express",
+    "socket.io",
+    "realtime",
+    "websocket"
+  ],
+  "scripts": {
+  },
+  "addons": [
+  ],
+  "env": {
+    "BUILDPACK_URL": "https://github.com/heroku/heroku-buildpack-nodejs"
+  }
+}
