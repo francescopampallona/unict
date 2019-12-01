@@ -7,10 +7,13 @@
   "success_url": "/",
   "keywords": [
     "node",
+    "body-parser",
+    "cors",
     "express",
-    "socket.io",
-    "realtime",
-    "websocket"
+    "express-validator",
+    "jsonwebtoken",
+    "mongoose",
+    "morgan"
   ],
   "scripts": {
   },
